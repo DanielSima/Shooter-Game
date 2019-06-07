@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rateOfFire: 0.05
-  velocity: 5
-  maxMagazine: 500
-  currentMagazine: 500
+  velocity: 10
+  maxMagazine: 100
+  currentMagazine: 100
   reloadTime: 6

@@ -5,6 +5,8 @@
 /// </summary>
 public class Player : Character
 {
+    public int remainingLives = 3;
+    public int score = 0;
 
     private new void Start()
     {
@@ -57,7 +59,7 @@ public class Player : Character
     {
         //destroy previous
         Destroy(weaponGameObject);
-        //TODO not working
+
         StopCoroutine(this.weapon.ReloadCoroutine());
 
         //update selected
@@ -73,5 +75,22 @@ public class Player : Character
         //create 
         SpawnWeapon();
         StartCoroutine(this.weapon.ReloadCoroutine());
+    }
+
+    public override void Die()
+    {
+        remainingLives--;
+        if(remainingLives <= 0) { UI.EndGame(); }
+        else { base.Die(); }
+    }
+
+    /// <summary>
+    /// When restarting the game.
+    /// </summary>
+    public void Restart()
+    {
+        //TODO SaveScore();
+        score = 0;
+        remainingLives = 3;
     }
 }

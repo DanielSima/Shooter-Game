@@ -12,11 +12,14 @@ public class UI : MonoBehaviour {
     public static Text healthText;
     public static Slider ammoSlider;
     public static Text ammoText;
+    public static Text remainingLivesText;
+    public static GameObject HUD;
     public static GameObject pauseMenu;
     public static GameObject helpMenu;
     public static GameObject creditsMenu;
     public static GameObject startMenu;
     public static GameObject highScoreMenu;
+    public static GameObject endGameMenu;
     public static GameObject selectMenu;
     public static GameObject selectMenu2;
 
@@ -34,6 +37,8 @@ public class UI : MonoBehaviour {
         healthText = transform.GetChild(0).GetChild(0).GetChild(2).GetComponent<Text>();
         ammoSlider = transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Slider>();
         ammoText = transform.GetChild(0).GetChild(1).GetChild(2).GetComponent<Text>();
+        remainingLivesText = transform.GetChild(0).GetChild(2).GetChild(1).GetComponent<Text>();
+        HUD = transform.GetChild(0).gameObject;
         pauseMenu = transform.GetChild(1).gameObject;
         helpMenu = transform.GetChild(2).gameObject;
         creditsMenu = transform.GetChild(3).gameObject;
@@ -41,6 +46,7 @@ public class UI : MonoBehaviour {
         selectMenu = transform.GetChild(5).gameObject;
         selectMenu2 = transform.GetChild(6).gameObject;
         highScoreMenu = transform.GetChild(7).gameObject;
+        endGameMenu = transform.GetChild(8).gameObject;
 
         mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         startMenuCamera = GameObject.FindGameObjectWithTag("startMenuCamera");
@@ -61,6 +67,7 @@ public class UI : MonoBehaviour {
         ammoSlider.maxValue = player.weapon.maxMagazine;
         ammoSlider.value = player.weapon.currentMagazine;
         ammoText.text = player.weapon.currentMagazine + "/" + player.weapon.maxMagazine;
+        remainingLivesText.text = player.remainingLives + " lives";
     }
 
     /// <summary>
@@ -70,6 +77,7 @@ public class UI : MonoBehaviour {
     {
         Time.timeScale = 0f;
 
+        HUD.SetActive(false);
         pauseMenu.SetActive(false);
         helpMenu.SetActive(false);
         creditsMenu.SetActive(false);
@@ -78,6 +86,8 @@ public class UI : MonoBehaviour {
         highScoreMenu.SetActive(false);
         startMenu.SetActive(true);
         mainCamera.SetActive(false);
+        endGameMenu.SetActive(false);
+
         startMenuCamera.SetActive(true);
     }
 
@@ -127,6 +137,7 @@ public class UI : MonoBehaviour {
         selectMenu2.SetActive(false);
         startMenu.SetActive(false);
 
+        HUD.SetActive(true);
         mainCamera.SetActive(true);
         startMenuCamera.SetActive(false);
     }
@@ -195,9 +206,17 @@ public class UI : MonoBehaviour {
         helpMenu.SetActive(false);
         creditsMenu.SetActive(false);
         highScoreMenu.SetActive(false);
+        endGameMenu.SetActive(false);
     }
 
-
+    public static void EndGame()
+    {
+        Time.timeScale = 0f;
+        backToWhere = "start";
+        player.Restart();
+        Enemy.Restart();
+        endGameMenu.SetActive(true);
+    }
     /// <summary>
     /// Changes player's stuff.
     /// </summary>

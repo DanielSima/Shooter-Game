@@ -77,7 +77,7 @@ public class Character : MonoBehaviour
     /// <summary>
     /// respawns the character.
     /// </summary>
-    public void Die()
+    public virtual void Die()
     {
         currentHealth = maxHealth;
         GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("spawnPoint");

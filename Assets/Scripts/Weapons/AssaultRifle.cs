@@ -6,7 +6,7 @@
     //!!!!reset the component in inspector when changing those values!!!! 
     public void Reset()
     {
-        velocity = 10f;
+        velocity = 15f;
         rateOfFire = 0.2f;
         maxMagazine = 28f;
         currentMagazine = maxMagazine;

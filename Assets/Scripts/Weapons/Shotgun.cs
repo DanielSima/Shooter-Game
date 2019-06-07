@@ -7,7 +7,7 @@ public class Shotgun : Weapon {
     //!!!!reset the component in inspector when changing those values!!!!
     public void Reset()
     {
-        velocity = 15f;
+        velocity = 20f;
         rateOfFire = 0.8f;
         maxMagazine = 6f;
         currentMagazine = maxMagazine;

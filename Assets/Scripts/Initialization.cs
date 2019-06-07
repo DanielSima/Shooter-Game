@@ -19,8 +19,20 @@ public class Initialization : MonoBehaviour {
         Character.ClassicBulletPrefab = Resources.Load<GameObject>("classicBullet");
 
         //spawn enemies 
-        //TODO increase difficluty
-        Enemy.Spawn(1);
+        StartCoroutine(EnemySpawnCoroutine());
 
+    }
+
+    /// <summary>
+    /// Spanw more enemies after time.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator EnemySpawnCoroutine()
+    {
+        while (GameObject.FindGameObjectsWithTag("character").Length < 10)
+        {
+            Enemy.Spawn(1);
+            yield return new WaitForSeconds(10);
+        }
     }
 }

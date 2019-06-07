@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI;
@@ -13,65 +14,66 @@ public class Enemy : Character
     public Transform target;
     public static GameObject enemyPrefab;
 
-    public float MaximumAttackDistance = 25;
-    public float MinimumDistanceFromPlayer = 1f;
+    Vector3 targetPosition;
+    Vector3 thisPosition;
 
-    bool haveSeen = false;
-    float timer = 0;
+    public float MaximumAttackDistance = 25f;
+    public float MinimumDistanceFromPlayer = 5f;
 
     private new void Start()
     {
         base.Start();
 
-        //TODO asign weapon here
-        selectedBulletPrefab = FireBulletPrefab;
-        selectedWeaponPrefab = AssaultRiflePrefab;
+        //select random weapon and bullet
+        List<GameObject> bullets = new List<GameObject> { ClassicBulletPrefab, FireBulletPrefab, ExplosiveBulletPrefab};
+        List<GameObject> weapons = new List<GameObject> { AssaultRiflePrefab, ShotgunPrefab, MinigunPrefab };
+        selectedBulletPrefab = bullets[UnityEngine.Random.Range(0, bullets.Count)]; 
+        selectedWeaponPrefab = weapons[UnityEngine.Random.Range(0, weapons.Count)];
 
         target = GameObject.FindGameObjectWithTag("Player").transform;
 
         SpawnWeapon();
 
+        StartCoroutine(weapon.ReloadCoroutine());
     }
 
     private void Update()
     {
-        float distance = Vector3.Distance(target.position, transform.position);
+        thisPosition = this.GetComponent<Rigidbody>().worldCenterOfMass;
+        targetPosition = target.GetComponent<Rigidbody>().worldCenterOfMass;
+
+        float distance = Vector3.Distance(targetPosition, thisPosition);
         RaycastHit hit;
-        Vector3 rayDirection = target.position - transform.position;
+        Vector3 rayDirection = targetPosition - thisPosition;
         NavMeshAgent agent = this.GetComponent<NavMeshAgent>();
 
-        
-        if (distance <= MaximumAttackDistance)
+        if (Physics.Raycast(thisPosition, rayDirection, out hit))
         {
-            //TODO target position is not in center of mesh
-            if (Physics.Raycast(transform.position, rayDirection, out hit))
+            UnityEngine.Debug.DrawLine(thisPosition, targetPosition, Color.red);
+            //if enemy sees the player
+            if (hit.transform == target && distance <= MaximumAttackDistance)
             {
-                //if enemy sees the player
-                if (hit.transform == target)
+                LookAtTarget();
+                Shoot();
+                agent.destination = targetPosition;
+                agent.isStopped = false;
+                if (distance <= MinimumDistanceFromPlayer)
                 {
-                    LookAtTarget();
-                    haveSeen = true;
-                    timer = 0;
-                    Shoot();
-                }
-
-                //if doesn't see but have seen at least 2s ago
-                if (haveSeen == true && hit.transform != target)
-                {
-                    agent.destination = target.position;
-                }
-
-                //if haven't seen for 2s
-                if (timer > 2.0f && haveSeen == true)
-                {
-                    haveSeen = false;
                     agent.isStopped = true;
                 }
-                timer += Time.deltaTime;
-            }
 
-            rateOfFireTimer += Time.deltaTime;
+            }
+            //change the randDestination if already there
+            else if (agent.remainingDistance < 1)
+            {
+                //make enemy walk around the map if doesn't see the player
+                GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("spawnPoint");
+                Vector3 randDestination = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].transform.position;
+                agent.destination = randDestination;
+            }
         }
+        rateOfFireTimer += Time.deltaTime;
+
     }
     /// <summary>
     /// aim at the player.
@@ -85,7 +87,7 @@ public class Enemy : Character
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationSpeed);
 
         //rotate weapon vertically
-        weaponGameObject.transform.LookAt(target);
+        weaponGameObject.transform.LookAt(targetPosition);
     }
 
     /// <summary>
@@ -98,6 +100,25 @@ public class Enemy : Character
         {
             Vector3 position = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].transform.position;
             Instantiate(enemyPrefab,position,new Quaternion());
+        }
+    }
+
+    public override void Die()
+    {
+        target.GetComponent<Player>().score++;
+        base.Die();
+    }
+
+    /// <summary>
+    /// Restart the enemy count
+    /// </summary>
+    public static void Restart()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("character");
+
+        foreach(GameObject enemy in enemies)
+        {
+            Destroy(enemy);
         }
     }
 }
